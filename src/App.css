@@ -1,0 +1,26 @@
+
+
+.design{
+    height: 150px;
+    width:80%;
+    /* background-color: rgb(233, 238, 234); */
+    /* border:2px solid black; */
+    margin-left: 20px;
+    
+}
+.design1{
+    height:150px ;
+    width: 400px;
+}
+
+
+.main-div{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2%;
+}
+td{
+    
+   text-align: center;
+  
+}
