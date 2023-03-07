@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./App.css";
-import {debounce} from "lodash";
+import { debounce } from "lodash";
 
 const postData = [
   {
@@ -53,33 +53,29 @@ const postData = [
   },
 ];
 
+const likesarr = [];
+for (let i = 0; i < postData.length; i++) {
+  likesarr.push(postData[i].likes);
+}
+const maxLikes = Math.max(...likesarr);
+const minLikes = Math.min(...likesarr);
 
- const likesarr = [];
-  for (let i = 0; i < postData.length; i++) {
-    likesarr.push(postData[i].likes);
-  }
-  const maxLikes = Math.max(...likesarr);
-  const minLikes = Math.min(...likesarr);
+const followersarr = [];
+for (let i = 0; i < postData.length; i++) {
+  followersarr.push(postData[i].followers);
+}
+const maxFollowers = Math.max(...followersarr);
+const minFollowers = Math.min(...followersarr);
 
-
-  const followersarr = [];
-  for (let i = 0; i < postData.length; i++) {
-    followersarr.push(postData[i].followers);
-  }
-  const maxFollowers = Math.max(...followersarr);
-  const minFollowers = Math.min(...followersarr);
-
-
-  const sharecountarr = [];
-  for (let i = 0; i < postData.length; i++) {
-    sharecountarr.push(postData[i].shareCount);
-  }
-  const maxshareCount = Math.max(...sharecountarr);
-  const minshareCount = Math.min(...sharecountarr);
+const sharecountarr = [];
+for (let i = 0; i < postData.length; i++) {
+  sharecountarr.push(postData[i].shareCount);
+}
+const maxshareCount = Math.max(...sharecountarr);
+const minshareCount = Math.min(...sharecountarr);
 
 const Table = () => {
   const [posts, setPosts] = useState(postData);
-  
 
   const [sortColumn, setSortColumn] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
@@ -87,58 +83,33 @@ const Table = () => {
   const [value, setValue] = useState(maxLikes);
   const [follValue, setFollValue] = useState(maxFollowers);
   const [shareValue, setShareValue] = useState(maxshareCount);
-  const [range, setRange] = useState(postData);
-  const [follRange, setFollRange] = useState(postData);
-  const [countRange, setCountRange] = useState(postData);
+  const [filteredPostData, setFilteredPostData] = useState(postData);
 
-  const handleChange = (event) => {
-    setValue(event.target.value);
-    
-  }
-  const handleChangeFoll = (event) => {
-     setFollValue(event.target.value);
-     
-  }
-  const handleChangeCount = (event) => {
-    setShareValue(event.target.value);
-    
- }
-
-  const handleRange = () => {
+  const handleRange = (value) => {
+    setValue(value);
     const filteredData = postData.filter(
       (post) => post.likes >= 0 && post.likes <= value
     );
-    // setPosts(filteredData);
-    setRange(filteredData);
+    debounce(setFilteredPostData(filteredData), 5000);
   };
 
-  const handlefollRange = () => {
-    const filteredData = range.filter(
-      (post) => post.followers >= 0 && post.followers <= follValue
+  const handlefollRange = (value) => {
+    setFollValue(value);
+    const filteredData = postData.filter(
+      (post) => post.followers >= 0 && post.followers <= value
     );
-    // setPosts(filteredData);
-    setFollRange(filteredData);
+    debounce(setFilteredPostData(filteredData), 5000);
   };
 
-  const handlecountRange = () => {
-    const filteredData = follRange.filter(
-      (post) => post.shareCount >= 0 && post.shareCount <= shareValue
+  const handlecountRange = (value) => {
+    setShareValue(value);
+    const filteredData = postData.filter(
+      (post) => post.shareCount >= 0 && post.shareCount <= value
     );
-    // setPosts(filteredData);
-    setCountRange(filteredData);
+    debounce(setFilteredPostData(filteredData), 5000);
   };
 
-
-  useEffect(() => {
-    handleRange();
-    handlefollRange();
-   handlecountRange();
-  }, [value,follValue,shareValue]);
- 
-  console.log("range", range);
-  console.log("follRange", follRange);
-  console.log("countRange", countRange);
-  console.table("mydata", posts);
+  console.log("filteredPostData", filteredPostData);
 
   const handleSort = (columnName) => {
     if (sortColumn === columnName) {
@@ -160,11 +131,11 @@ const Table = () => {
   };
 
   const sortedPosts = sortColumn
-    ? [...countRange].sort((a, b) => {
+    ? [...filteredPostData].sort((a, b) => {
         const sortVal = sortOrder === "asc" ? 1 : -1;
         return sortVal * (a[sortColumn] - b[sortColumn]);
       })
-    : countRange;
+    : filteredPostData;
 
   const filteredPosts = filterEmotion
     ? sortedPosts.filter((post) => post.emotion === filterEmotion)
@@ -202,43 +173,49 @@ const Table = () => {
         <button onClick={() => handleFilter("neutral")}>Neutral</button>
         <button onClick={handleReset}>Reset</button>
       </div>
-<div className="scrool">
-      <div>
-        <input
-          type="range"
-          id="volume"
-          name="volume"
-          min={minLikes}
-          max={maxLikes}
-          value={value}
-          onChange={handleChange}
-        />
-        <label for="volume">Likes {value}</label>
+      <div className="scrool">
+        <div>
+          <input
+            type="range"
+            id="volume"
+            name="volume"
+            min={minLikes}
+            max={maxLikes}
+            value={value}
+            onChange={(e) => {
+              handleRange(e.target.value);
+            }}
+          />
+          <label for="volume">Likes {value}</label>
 
-        <input
-          type="range"
-          id="volume"
-          name="volume"
-          min={minFollowers}
-          max={maxFollowers}
-          value={follValue}
-          onChange={handleChangeFoll}
-        />
+          <input
+            type="range"
+            id="volume"
+            name="volume"
+            min={minFollowers}
+            max={maxFollowers}
+            value={follValue}
+            onChange={(e) => {
+              handlefollRange(e.target.value);
+            }}
+          />
 
-        <label for="volume">Followers {follValue}</label>
+          <label for="volume">Followers {follValue}</label>
 
-        <input
-          type="range"
-          id="volume"
-          name="volume"
-          min={minshareCount}
-          max={maxshareCount}
-          value={shareValue}
-          onChange={handleChangeCount}
-        />
+          <input
+            type="range"
+            id="volume"
+            name="volume"
+            min={minshareCount}
+            max={maxshareCount}
+            value={shareValue}
+            onChange={(e) => {
+              handlecountRange(e.target.value);
+            }}
+          />
 
-        <label for="volume">Share Count {shareValue}</label>
-      </div>
+          <label for="volume">Share Count {shareValue}</label>
+        </div>
       </div>
     </div>
   );
