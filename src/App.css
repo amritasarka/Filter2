@@ -24,3 +24,7 @@ td{
    text-align: center;
   
 }
+.scrool{
+    display: flex;
+    flex-direction: column;
+}
